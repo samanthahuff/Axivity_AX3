@@ -69,11 +69,11 @@ epoch_r = zeros(1,3); %array of epoch ranges
 
 [yr2,mo2,day2,hr2,mn2,~] = datevec(t(end));
 
-%get times in number of epochs
+%get times in number of epochs %print these out
 min_to_start = (hr1*60) + mn1;
 min_to_stop = (hr2*60) + mn2;
 
-epoch_before_start = floor(min_to_start/epoch_m);
+epoch_before_start = floor(min_to_start/epoch_m); 
 epoch_after_stop = ceil(min_to_stop/epoch_m);
 
 start_time = datenum(yr1,mo1,day1,0,epoch_before_start*epoch_m,0);
@@ -92,15 +92,15 @@ while(bx<=last_epoch)
     epoch2 = (bx+bigsearch_n-1)*datenum(0,0,0,0,epoch_m,0) + start_time;
     
     % get indices of big epoch
-    t1 = find(t>=epoch1,1,'first');
-    t2 = find(t<epoch2,1,'last');
+    t1 = find(t>=epoch1,1,'first'); %find first time where epoch1 =t
+    t2 = find(t<epoch2,1,'last'); %find last epoch were epoch2 =t
     
     % sanitize indices
     t1 = min([t1,length(t)]);
     t2 = max([t2,1]);
 
     % get acceleration data of big epoch
-    if(t2-t1>1)
+    if(t2-t1>1) %if big epoch is bigger than small epoch
         x1 = double(data.x(t1:t2))*data.AccScale;
         y1 = double(data.y(t1:t2))*data.AccScale;
         z1 = double(data.z(t1:t2))*data.AccScale;
