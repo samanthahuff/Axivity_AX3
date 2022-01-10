@@ -178,6 +178,7 @@ while(bx<=last_epoch)
 
             % check st dev and range for wear time
             n_std = size(find(epoch_std<(3/1000)),2);   %number of axes below std threshold
+            n_std = size(find(epoch_std<(9/1000)),2);   %number of axes below std threshold
             n_r = size(find(epoch_r<(50/1000)),2);      %number of axes below range threshold
 
             if(n_std>1 || n_r>1 || sum(isnan(epoch_std)>1) || sum(isnan(epoch_r))>1) 
