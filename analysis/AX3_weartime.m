@@ -69,7 +69,6 @@ epoch_r = zeros(1,3); %array of epoch ranges
 
 [yr2,mo2,day2,hr2,mn2,~] = datevec(t(end));
 
-%get times in number of epochs %print these out
 min_to_start = (hr1*60) + mn1;
 min_to_stop = (hr2*60) + mn2;
 
@@ -127,7 +126,7 @@ while(bx<=last_epoch)
         % too many axes below threshold -> nonwear
         
         % set all epochs in big epoch range to nonwear
-        epoch_cell = [epoch1:datenum(0,0,0,0,epoch_m,0):(epoch2-datenum(0,0,0,0,epoch_m,0))]';
+        epoch_cell = [epoch1:datenum(0,0,0,0,epoch_m,0):(epoch2-datenum(0,0,0,0,epoch_m,0))]'; %by steps on epoch_m, range from epoch 1 to beginning of epoch2
         epoch_cell = mat2cell(epoch_cell,ones(bigsearch_n,1),[1]);
         
         wtv = [wtv; [epoch_cell, ...
@@ -221,54 +220,54 @@ end
 
 % Close "holes" if output epochs are 30 minutes or less. Doesn't make sense
 % to close holes if epochs are much larger than that, in my opinion. 
-if(epoch_m<=30)
-    
-    % close 'holes' on non-wear between wear-time if 2 or less epochs wide
-    wtv_cell = cellfun(@num2str,wtv(:,2),'UniformOutput',0)';
-    wtv_str = cellfun(@horzcat,wtv_cell);
-
-    holes = findstr(wtv_str,'1001');
-    while(~isempty(holes))
-        wtv_str(holes(1):(holes(1)+3)) = '1111';
-        holes = findstr(wtv_str,'1001');
-    end
-
-    holes = findstr(wtv_str,'101');
-    while(~isempty(holes))
-        wtv_str(holes(1):(holes(1)+2)) = '111';
-        holes = findstr(wtv_str,'101');
-    end
-
-    fill_str = mat2cell(wtv_str',ones(size(wtv(:,2))),[1]);
-    fill_cell = cellfun(@str2num,fill_str,'UniformOutput',0);
-
-    wtv(:,2) = fill_cell;
-
-
-    % close 'holes' on wear-time between non-wear,
-    % if 1-2 epoch wide and isolated (no wear-time nearby)
-    wtv_cell = cellfun(@num2str,wtv(:,2),'UniformOutput',0)';
-    wtv_str = cellfun(@horzcat,wtv_cell);
-
-    holes = findstr(wtv_str,'0001000');
-    while(~isempty(holes))
-        wtv_str(holes(1):(holes(1)+6)) = '0000000';
-        holes = findstr(wtv_str,'0001000');
-    end
-
-    holes = findstr(wtv_str,'00011000');
-    while(~isempty(holes))
-        wtv_str(holes(1):(holes(1)+7)) = '00000000';
-        holes = findstr(wtv_str,'00011000');
-    end
-
-    fill_str = mat2cell(wtv_str',ones(size(wtv(:,2))),[1]);
-    fill_cell = cellfun(@str2num,fill_str,'UniformOutput',0);
-
-    wtv(:,2) = fill_cell;
-
-end
-
+% if(epoch_m<=30)
+%     
+%     % close 'holes' on non-wear between wear-time if 2 or less epochs wide
+%     wtv_cell = cellfun(@num2str,wtv(:,2),'UniformOutput',0)';
+%     wtv_str = cellfun(@horzcat,wtv_cell);
+% 
+%     holes = findstr(wtv_str,'1001');
+%     while(~isempty(holes))
+%         wtv_str(holes(1):(holes(1)+3)) = '1111';
+%         holes = findstr(wtv_str,'1001');
+%     end
+% 
+%     holes = findstr(wtv_str,'101');
+%     while(~isempty(holes))
+%         wtv_str(holes(1):(holes(1)+2)) = '111';
+%         holes = findstr(wtv_str,'101');
+%     end
+% 
+%     fill_str = mat2cell(wtv_str',ones(size(wtv(:,2))),[1]);
+%     fill_cell = cellfun(@str2num,fill_str,'UniformOutput',0);
+% 
+%     wtv(:,2) = fill_cell;
+% 
+% 
+%     % close 'holes' on wear-time between non-wear,
+%     % if 1-2 epoch wide and isolated (no wear-time nearby)
+%     wtv_cell = cellfun(@num2str,wtv(:,2),'UniformOutput',0)';
+%     wtv_str = cellfun(@horzcat,wtv_cell);
+% 
+%     holes = findstr(wtv_str,'0001000');
+%     while(~isempty(holes))
+%         wtv_str(holes(1):(holes(1)+6)) = '0000000';
+%         holes = findstr(wtv_str,'0001000');
+%     end
+% 
+%     holes = findstr(wtv_str,'00011000');
+%     while(~isempty(holes))
+%         wtv_str(holes(1):(holes(1)+7)) = '00000000';
+%         holes = findstr(wtv_str,'00011000');
+%     end
+% 
+%     fill_str = mat2cell(wtv_str',ones(size(wtv(:,2))),[1]);
+%     fill_cell = cellfun(@str2num,fill_str,'UniformOutput',0);
+% 
+%     wtv(:,2) = fill_cell;
+% 
+% end
+% 
 function wtv_periods = AX3_recursive_weartime(wtv_periods,period_in,t_in,s_total,wtv_ix,s_in,s_now,s_min)
 
 % round s_now to nearest factor of s_min seconds
