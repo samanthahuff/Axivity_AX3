@@ -177,7 +177,6 @@ while(bx<=last_epoch)
             epoch_r(1,3) = max(z1) - min(z1);
 
             % check st dev and range for wear time
-            n_std = size(find(epoch_std<(3/1000)),2);   %number of axes below std threshold
             n_std = size(find(epoch_std<(9/1000)),2);   %number of axes below std threshold
             n_r = size(find(epoch_r<(50/1000)),2);      %number of axes below range threshold
 
