@@ -69,6 +69,7 @@ epoch_r = zeros(1,3); %array of epoch ranges
 
 [yr2,mo2,day2,hr2,mn2,~] = datevec(t(end));
 
+%get times in number of epochs 
 min_to_start = (hr1*60) + mn1;
 min_to_stop = (hr2*60) + mn2;
 
