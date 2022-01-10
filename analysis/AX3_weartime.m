@@ -2,7 +2,9 @@ function [wtv]=AX3_weartime(data,epoch_m,bigsearch_n,epoch_min,active_threshold)
 % [wtv]=AX3_weartime(data,epoch_m,bigsearch_n);
 % 
 % INPUTS
-% data: AX3/AX6 data from AX3_quickdata.m
+% data: regularized data as a timetable with time in datetime, xRaw, yRaw,
+% zRaw and vmRaw columns. Acc is in g (raw data has been multiplied by
+% AccScale)
 % epoch_m: epoch length in minutes for output (1 minute to 1 day range)
 % bigsearch_n: number of epochs to search at once. larger n is faster. 
 % epoch_min: minimum size of epoch to check for wear time, leave empty for
@@ -61,13 +63,11 @@ wtv = []; %wear-time output
 epoch_std = zeros(1,3); %array for epoch st. devs.
 epoch_r = zeros(1,3); %array of epoch ranges
 
-% interpolate time data
-[t] = AX3_interpolatetime(data);
-
 %get start & stop times
-[yr1,mo1,day1,hr1,mn1,~] = datevec(t(1));
+data.timenum = datenum(data.time);
+[yr1,mo1,day1,hr1,mn1,~] = datevec(data.time(1));
 
-[yr2,mo2,day2,hr2,mn2,~] = datevec(t(end));
+[yr2,mo2,day2,hr2,mn2,~] = datevec(data.time(end));
 
 %get times in number of epochs 
 min_to_start = (hr1*60) + mn1;
@@ -92,18 +92,18 @@ while(bx<=last_epoch)
     epoch2 = (bx+bigsearch_n-1)*datenum(0,0,0,0,epoch_m,0) + start_time;
     
     % get indices of big epoch
-    t1 = find(t>=epoch1,1,'first'); %find first time where epoch1 =t
-    t2 = find(t<epoch2,1,'last'); %find last epoch were epoch2 =t
+    t1 = find(data.timenum >=epoch1,1,'first'); %find first time where epoch1 =t
+    t2 = find(data.timenum <epoch2,1,'last'); %find last epoch were epoch2 =t
     
     % sanitize indices
-    t1 = min([t1,length(t)]);
+    t1 = min([t1,length(data.time)]);
     t2 = max([t2,1]);
 
     % get acceleration data of big epoch
     if(t2-t1>1) %if big epoch is bigger than small epoch
-        x1 = double(data.x(t1:t2))*data.AccScale;
-        y1 = double(data.y(t1:t2))*data.AccScale;
-        z1 = double(data.z(t1:t2))*data.AccScale;
+        x1 = double(data.xRaw(t1:t2));
+        y1 = double(data.yRaw(t1:t2));
+        z1 = double(data.zRaw(t1:t2));
     else
         x1=0;
         y1=0;
@@ -149,18 +149,18 @@ while(bx<=last_epoch)
             epoch2 = (ix)*datenum(0,0,0,0,epoch_m,0) + start_time;
 
             % get indices of one epoch
-            t1 = find(t>=epoch1,1,'first');
-            t2 = find(t<epoch2,1,'last');
+            t1 = find(data.timenum>=epoch1,1,'first');
+            t2 = find(data.timenum<epoch2,1,'last');
 
             % sanitize indices
-            t1 = min([t1,length(t)]);
+            t1 = min([t1,length(data.time)]);
             t2 = max([t2,1]);
 
             % get acceleration data of epoch
             if(t2-t1>1)
-                x1 = double(data.x(t1:t2))*data.AccScale;
-                y1 = double(data.y(t1:t2))*data.AccScale;
-                z1 = double(data.z(t1:t2))*data.AccScale;
+                x1 = double(data.xRaw(t1:t2));
+                y1 = double(data.yRaw(t1:t2));
+                z1 = double(data.zRaw(t1:t2));
             else
                 x1=0;
                 y1=0;
@@ -188,7 +188,7 @@ while(bx<=last_epoch)
             else % check in 30 second periods for how much activity detected
 
                 wtv_periods = zeros(n_wtv,1);
-                wtv_periods = AX3_recursive_weartime(wtv_periods,[x1,y1,z1],t(t1:t2),s_total,1,s_total,s_total/2,s_min);
+                wtv_periods = AX3_recursive_weartime(wtv_periods,[x1,y1,z1],data.timenum(t1:t2),s_total,1,s_total,s_total/2,s_min);
 
                 
                 %% total active periods of wear time in minimum epochs
